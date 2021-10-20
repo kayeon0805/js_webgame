@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿵쿵따</title>
+</head>
+<body>
+    <div><span id='order'>1</span>번째 참가자</div>
+    <div>제시어: <span id='word'></span></div>
+    <input type="text">
+    <button>입력</button>
+    <script>
+        const number = Number(prompt('쿵쿵따 게임에 참석할 인원 수를 입력해주세요.'));
+
+        if (number) {
+            const $order = document.querySelector('#order');
+            const $word = document.querySelector('#word');
+            const $input = document.querySelector('input');
+            const $button = document.querySelector('button');
+
+            let word;
+            let newWord;
+
+            const onClickButton = (event) => {
+                if ((!word || word[word.length - 1] === newWord[0]) && newWord.length === 3) { //제시어가 비어있거나 올바르게 입력했을 경우
+                
+                    word = newWord;
+                    $word.textContent = word;
+                    const order = Number($order.textContent); // 참가자의 순서
+                    if (order + 1 > number) { // 순서가 다 지났을 경우 다시 1부터 시작
+                        $order.textContent = 1;
+                    } else {
+                        $order.textContent = order + 1;
+                    }
+                } else {
+                    alert('쿵쿵따 게임은 제시어의 끌 글자로 시작되는 3글자로 입력하여야 합니다.');
+                }
+                $input.value = '';
+                $input.focus();
+            };
+
+            const onInput = (event) => {
+                newWord = event.target.value;
+            };
+        
+            $button.addEventListener('click', onClickButton);
+            $input.addEventListener('input', onInput);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>숫자야구</title>
+</head>
+<body>
+    <form id="form">
+        <input type="text" id="input">
+        <button>확인</button>
+    </form>
+    <div id="logs"></div>
+    <script>
+        const $input = document.querySelector('#input');
+        const $form = document.querySelector('#form');
+        const $logs = document.querySelector('#logs');
+        let outCnt = 0;
+
+        // 1부터 9까지 들어가는 배열 만들기
+        const numbers = []; // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        for (let n = 0; n < 9; n += 1) {
+            numbers.push(n + 1);
+        }
+        // 위의 배열에서 랜덤으로 숫자 꺼내오는 배열(정답 4숫자)
+        const answer = []; // [3, 1, 4, 6]
+        for (let n = 0; n < 4; n += 1) { // 네 번 반복
+            // 인덱스를 써야 하기 때문에 0 ~ 8 정수
+            const index = Math.floor(Math.random() * numbers.length);
+            
+            answer.push(numbers[index]);
+            // 넣은 다음에 중복되지 않게 빼줌
+            numbers.splice(index, 1);
+        }
+
+        // numbers [2, 5, 6, 7, 8, 9]
+        // answers [3, 1, 4, undefined]
+        console.log(answer);
+
+        // 이전에 입력한 숫자 저장용 배열
+        const tries = [];
+        function checkInput(input) { // 3146, 314, 3144 
+            if (input.length !== 4) { // 길이가 4가 아닐 경우
+                return alert('4자리 숫자를 입력해주세요.');
+            }
+            // 중복을 제거하고 숫자가 4자리가 아닐 경우 (new Set => 중복 제거)
+            if (new Set(input).size !== 4) { 
+                return alert('중복되지 않게 입력해주세요.');
+            }
+            // 이미 시도한 값일 경우, 배열에 이 값이 들어있는가
+            // 맨 처음 숫자는 위에 두 경우만 체크하고 tries에 push
+            if (tries.includes(input)) {
+                return alert('이미 시도한 값입니다.');
+            }
+            return true;
+        }
+
+        $form.addEventListener('submit', (event) => {
+            event.preventDefault(); //기본 동작 막기 ex) form => 새로고침
+            const value = $input.value;
+            $input.value = '';
+            
+            if (!checkInput(value)) { // 입력값이 false일 경우
+                return;
+            }
+
+            // join => 배열을 문자열로 바꿈, split은 그 반대
+            // ex)[3, 1, 4, 6] -> '3146' 
+            if (answer.join('') === value) { 
+                $logs.textContent = '홈런!';
+                return;
+            }
+            // 9번째 시도 후 다음 submit할 때 해당 코드 실행 (= 총 10번)
+            if (tries.length > 9) { 
+                $logs.appendChild(document.createTextNode(`패배! 정답은 ${answer.join('')}`));
+                return;
+            }
+            // 입력값이 문제가 없다면 tries 배열에 추가
+            tries.push(value);
+            
+
+            // 몇 스트라이크 몇 볼인지 검사
+            let strike = 0;
+            let ball = 0;
+            // answer : 3146, value: 1347
+            for (let i=0; i<answer.length; i++) {
+
+                // value에 answer 값이 있는가? 있으면 인덱스 몇 번째인가
+                const index = value.indexOf(answer[i]);// 해당 값을 찾지 못하면 index는 -1
+                if (index > -1) { // 일치하는 숫자 발견
+                    if (index === i) { // 자릿수도 같음
+                        strike += 1;
+                    } else { // 숫자만 같음
+                        ball += 1;
+                    }
+                }
+            }
+            if (strike === 0 && ball === 0) {
+                outCnt += 1;
+                $logs.append(`${tries.length}번째 시도 ${value}: ${outCnt} 아웃!`, document.createElement('br'));
+            } else {
+                $logs.append(`${tries.length}번째 시도 ${value}: ${strike} 스트라이크 ${ball} 볼`, document.createElement('br'));
+            }
+            if (outCnt === 3) {
+                alert('3아웃 패배!');
+            }
+        })
+    </script>
+</body>
+</html> 

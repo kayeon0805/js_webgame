@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+    #computer {
+      width: 142px;
+      height: 200px;
+    }
+</style>
+<title>가위바위보</title>
+</head>
+<body>
+    <div id="computer"></div>
+    <div>
+    <button id="scissors" class="btn">가위</button>
+    <button id="rock" class="btn">바위</button>
+    <button id="paper" class="btn">보</button>
+    </div>
+    <div id="score">0</div>
+    <script>
+        const $computer = document.querySelector('#computer');
+        const $score = document.querySelector('#score');
+        const $rock = document.querySelector('#rock');
+        const $scissors = document.querySelector('#scissors');
+        const $paper = document.querySelector('#paper');
+        // 이미지를 합쳐 이미지 요청 횟수를 줄임 => 이미지 스프라이트
+        const IMG_URL = './rsp.png';
+        // 이미지의 가로 위치, 세로 위치 지정
+        $computer.style.background = `url(${IMG_URL}) -464px 0`;
+        // 이미지의 가로 너비, 세로 너비 지정
+        $computer.style.backgroundSize = 'auto 200px';
+
+        /*
+            const scissorsX = '-0';
+            const rockX = '-220px';
+            const paperX = '-440px';
+        */
+       // X 좌표라는 공통점 => 객체로 뮦어 표현하는 것이 좋음(그룹화/ 변수명이 겹치는 것을 방지)
+        const rspX = {
+            scissors: '0', // 가위
+            rock: '-220px', // 바위
+            paper: '-440px', // 보
+        };
+
+        let computerChoice = 'scissors';
+
+        const changeComputerHand = () => {
+            if (computerChoice === 'scissors') { // 가위면
+                computerChoice = 'rock';
+            } 
+            else if (computerChoice === 'rock') { // 바위
+                computerChoice = 'paper';
+            } else if (computerChoice === 'paper') { // 보
+                computerChoice = 'scissors';
+            }
+            // rspX.computerChoice => 문자열 / rspX[computerChoice] => 값
+            // rspX.computerChoice => undefined / rspX[computerChoice] = '-220px'
+            $computer.style.background = `url(${IMG_URL}) ${rspX[computerChoice]} 0`;
+            $computer.style.backgroundSize = 'auto 200px';
+        }
+        // changeComputerHand() => 리턴값이 undefined => 함수 자리가 undefined 돼버림
+        let interValid = setInterval(changeComputerHand, 50); // 일정시간마다 "반복" 실행
+
+        // 가위바위보 규칙 위한 세팅
+        const scoreTable = {
+            rock: 0,
+            scissors: 1,
+            paper: -1,
+        };
+
+        let clickable = true;
+        let comscore = 0;
+        let score = 0;
+        const clickButton = () => {
+            if (clickable) {
+                clearInterval(interValid);
+                clickable = false;
+                // 점수 계산 및 화면 표시
+                const myChoice = event.target.textContent === '바위'
+                ? 'rock'
+                : event.target.textContent === '가위'
+                    ? 'scissors'
+                    : 'paper';
+                const myScore = scoreTable[myChoice];
+                const computerScore = scoreTable[computerChoice];
+                const diff = myScore - computerScore;
+
+
+                // diff === '고양이' || diff === '사자' || diff === '강아지' || diff === '거북이'
+                // => ['고양이', '사자', '강아지', '거북이'].includes(diff)
+
+                let message;
+                // 2, -1은 승리조건, -2, 1은 패배조건
+                if ([2, -1].includes(diff)) {
+                    score += 1;
+                    message = '승리';
+                } else if ([-2, 1].includes(diff)) {
+                    score -= 1;
+                    message = '패배';
+                    comscore += 1;
+                } else {
+                    message =  '무승부';
+                }
+                if (score >= 3) {
+                    $score.textContent = `나의 승리 ${score} : ${comscore}`;
+                } else if (comscore >= 3) {
+                    $score.textContent = `컴퓨터의 승리 ${score} : ${comscore}`;
+                } else {
+                    $score.textContent = `${message} 총: ${score}점`;
+
+                    setTimeout(() => {
+                        clickable = true;
+                        interValid = setInterval(changeComputerHand, 50);
+                    }, 1000);
+                }
+            }
+        };
+
+        $rock.addEventListener('click', clickButton);
+        $scissors.addEventListener('click', clickButton);
+        $paper.addEventListener('click', clickButton);
+
+    </script>
+</body>
+</html>

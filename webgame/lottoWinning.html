@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>로또 당첨확인</title>
+</head>
+<style>
+    .ball {
+      display: inline-block;
+      border: 1px solid black;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 20px;
+      text-align: center;
+      margin-right: 20px;
+    }
+  </style>
+<body>
+    <div id='result'>추첨 결과: </div>
+    <div id='bonus'>보너스: </div>
+    <div id='myPick'>나의 번호: </div>
+    <div id='finalResult'>최종 결과: </div>
+    <script>
+        const $result = document.querySelector('#result');
+        const $bonus = document.querySelector('#bonus');
+        const $myPick = document.querySelector('#myPick');
+        const $finalResult = document.querySelector('#finalResult');        
+
+        // 로또 번호 만들기
+        const array = Array(45).fill().map((el, i) => i + 1);
+        
+        const shuffle = [];
+        while (array.length > 0) {
+            const random = Math.floor(Math.random() * array.length);
+            const randomArr = array.splice(random, 1);
+            const value = randomArr[0];
+            shuffle.push(value);
+        }
+
+        const winBalls = shuffle.slice(0, 6).sort((a, b) => a - b);
+        const bonus = shuffle[6];
+        console.log(winBalls, bonus);
+
+        const myBalls = [];
+        // 사용자 입력
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 6; j++) {
+                const  num = Number(prompt((i+1) + '번째 줄 로또 번호를 하나씩 입력해주세요.'));
+                if (0 >= num || num > 45) {
+                    alert('1에서 45까지의 숫자를 입력해주세요.');
+                }
+                myBalls.push(num);
+            }
+        }
+
+        if (myBalls.includes('') || myBalls.includes(null)) {
+            alert('숫자를 다 입력하지 않으셨습니다.');
+        } else {
+            for (let i = 0; i < myBalls.length; i++) {
+                showBall(myBalls[i], $myPick);
+            }
+        }
+
+        function colorize(number, ball) {
+            if (number < 10) {
+                ball.style.backgroundColor = 'red';
+                ball.style.color = 'white';
+            } else if (number < 20) {
+                ball.style.backgroundColor = 'orange';
+                ball.style.color = 'black';
+            } else if (number < 30) {
+                ball.style.backgroundColor = 'yellow';
+                ball.style.color = 'black';
+            } else if (number < 40) {
+                ball.style.backgroundColor = 'green';
+                ball.style.color = 'white';
+            } else if (number < 50) {
+                ball.style.backgroundColor = 'blue';
+                ball.style.color = 'white';
+            }
+        }
+
+        function showBall(number, place) {
+            const $mkDiv = document.createElement('div');
+            $mkDiv.className = 'ball';
+            $mkDiv.textContent = number;
+            place.append($mkDiv);
+            colorize(number, $mkDiv)
+        }
+
+        let winningCnt = 0;
+        let bonusCnt = 0;
+        if (myBalls) {
+            for (let i = 0; i < winBalls.length; i++) {
+                setTimeout(() => {
+                    showBall(winBalls[i], $result);
+                }, (i + 1) * 1000)
+            }
+
+            setTimeout(() => {
+                showBall(bonus, $bonus);
+            }, 7000)        
+        
+            function showResult() {
+                for (let i = 0; i < 6; i++) {
+                    for (let j = 0; j < myBalls.length; j++) {
+                        if (winBalls[i] == myBalls[j]) {
+                            winningCnt += 1;
+                        }
+                    }
+                }
+                for (let i = 0; i < myBalls.length; i++) {
+                    if (bonus == myBalls[i]) {
+                        bonusCnt += 1;
+                    }
+                }
+                
+                if (winningCnt <= 2) {
+                    $finalResult.append('아쉽게도 낙첨되었습니다.');
+                } else if (winningCnt == 3) {
+                    $finalResult.append('5등입니다!');
+                } else if (winningCnt == 4) {
+                    $finalResult.append('4등입니다!');
+                } else if (winningCnt == 5) {
+                    $finalResult.append('축하합니다! 3등입니다!');
+                } else if (winningCnt == 5 && bonusCnt == 1) {
+                    $finalResult.append('축하합니다! 2등입니다!');
+                } else {
+                    $finalResult.append('축하합니다! 1등에 당첨되셨습니다!');
+                }
+            }
+            
+            setTimeout(() => {
+                showResult();
+            }, 9000);
+        }
+    </script>
+</body>
+</html>
